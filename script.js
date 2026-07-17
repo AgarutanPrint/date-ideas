@@ -16,7 +16,7 @@
   let store = loadStore();
   store.sparks = store.sparks || [];
   store.budget = store.budget || [];
-  store.planner = store.planner || {};
+  store.plans = store.plans || [];
 
   // ---------------- NAVIGATION ----------------
   const NAV_TO_VIEW = {
@@ -40,6 +40,16 @@
     window.scrollTo({top:0, behavior:"instant" in window ? "instant":"auto"});
   }
 
+  // Menu-style color coding: tint each nav item to match its section
+  document.querySelectorAll(".navlist button[data-view]").forEach(btn=>{
+    const navKey = btn.dataset.view;
+    if(navKey === "toolkit"){ btn.classList.add("tint-yellow"); return; }
+    const sKey = NAV_TO_SECTIONKEY[navKey];
+    if(!sKey) return; // "home" stays neutral
+    const meta = SECTIONS.find(s=>s.id===sKey);
+    if(meta) btn.classList.add("tint-"+meta.color);
+  });
+
   document.getElementById("navlist").addEventListener("click", e=>{
     const btn = e.target.closest("button[data-view]");
     if(!btn) return;
@@ -57,7 +67,7 @@
     const meta = SECTIONS.find(s=>s.id===sKey);
     const count = DATES.filter(d=>d.section===sKey).length;
     const div = document.createElement("div");
-    div.className = "mini-card";
+    div.className = "mini-card tint-"+meta.color;
     div.innerHTML = `<div class="n">${count} ideas</div><div class="t">${meta.label}</div><div style="font-size:.82rem;color:var(--ink-soft);margin-top:4px;">${meta.tagline}</div>`;
     div.addEventListener("click", ()=> showView(navKey));
     homeCardsEl.appendChild(div);
@@ -115,7 +125,7 @@
     const energies = ["All","Low","Medium","High"];
 
     el.innerHTML = `
-      <div class="section-head">
+      <div class="section-head tint-${meta.color}">
         <span class="eyebrow">${items.length} ideas</span>
         <h1>${meta.label}</h1>
         <p>${meta.tagline}</p>
@@ -212,33 +222,30 @@
     document.getElementById(`pane-${btn.dataset.tool}`).classList.add("active");
   });
 
-  // ---------------- PLANNER (Tool #1) ----------------
+  // ---------------- PLANNER ARCHIVE (Tool #1) ----------------
   (function(){
-    const ids = ["pl-idea","pl-lead","pl-when","pl-budget","pl-childcare","pl-prep","pl-best","pl-laugh"];
-    const p = store.planner;
-    ids.forEach(id=>{
-      const el = document.getElementById(id);
-      if(p[id] !== undefined) el.value = p[id];
-    });
-    if(p["pl-again"]){
-      const r = document.querySelector(`input[name="pl-again"][value="${p["pl-again"]}"]`);
-      if(r) r.checked = true;
-    }
+    store.plans = store.plans || [];
 
-    // 1–10 scale buttons
-    const scaleEl = document.getElementById("pl-scale");
-    let selected = p.scale || null;
-    for(let i=1;i<=10;i++){
-      const b = document.createElement("button");
-      b.type = "button";
-      b.textContent = i;
-      if(selected===i) b.classList.add("sel");
-      b.addEventListener("click", ()=>{
-        selected = i;
-        scaleEl.querySelectorAll("button").forEach(x=>x.classList.remove("sel"));
-        b.classList.add("sel");
+    // one-time migration: earlier version of this site only stored a single
+    // plan under store.planner — fold it into the archive so nobody loses data.
+    if(store.planner && store.planner["pl-idea"]){
+      store.plans.unshift({
+        id: Date.now(),
+        idea: store.planner["pl-idea"]||"",
+        lead: store.planner["pl-lead"]||"Partner A",
+        when: store.planner["pl-when"]||"",
+        budget: store.planner["pl-budget"]||"",
+        childcare: store.planner["pl-childcare"]||"At-home (kids asleep)",
+        prep: store.planner["pl-prep"]||"",
+        reflection: {
+          best: store.planner["pl-best"]||"",
+          laugh: store.planner["pl-laugh"]||"",
+          scale: store.planner.scale||null,
+          again: store.planner["pl-again"]||null,
+        }
       });
-      scaleEl.appendChild(b);
+      delete store.planner;
+      saveStore(store);
     }
 
     function flashMsg(el){
@@ -247,22 +254,109 @@
     }
 
     document.getElementById("pl-save").addEventListener("click", ()=>{
-      ["pl-idea","pl-lead","pl-when","pl-budget","pl-childcare","pl-prep"].forEach(id=>{
-        store.planner[id] = document.getElementById(id).value;
+      const idea = document.getElementById("pl-idea").value.trim();
+      if(!idea){ document.getElementById("pl-idea").focus(); return; }
+      store.plans.unshift({
+        id: Date.now(),
+        idea,
+        lead: document.getElementById("pl-lead").value,
+        when: document.getElementById("pl-when").value,
+        budget: document.getElementById("pl-budget").value,
+        childcare: document.getElementById("pl-childcare").value,
+        prep: document.getElementById("pl-prep").value,
+        reflection: { best:"", laugh:"", scale:null, again:null }
       });
       saveStore(store);
+      ["pl-idea","pl-when","pl-budget","pl-prep"].forEach(id=> document.getElementById(id).value = "");
       flashMsg(document.getElementById("pl-msg"));
+      renderArchive();
     });
 
-    document.getElementById("pl-save2").addEventListener("click", ()=>{
-      store.planner["pl-best"] = document.getElementById("pl-best").value;
-      store.planner["pl-laugh"] = document.getElementById("pl-laugh").value;
-      store.planner.scale = selected;
-      const checked = document.querySelector('input[name="pl-again"]:checked');
-      store.planner["pl-again"] = checked ? checked.value : null;
-      saveStore(store);
-      flashMsg(document.getElementById("pl-msg2"));
-    });
+    const archiveEl = document.getElementById("plan-archive");
+
+    function renderArchive(){
+      archiveEl.innerHTML = "";
+      if(store.plans.length===0){
+        archiveEl.innerHTML = `<p class="empty-note">No dates logged yet — add your first one above.</p>`;
+        return;
+      }
+      store.plans.forEach((plan)=>{
+        const div = document.createElement("div");
+        div.className = "spark-entry";
+        const r = plan.reflection || (plan.reflection = {best:"",laugh:"",scale:null,again:null});
+        div.innerHTML = `
+          <button class="del" title="Delete">✕</button>
+          <h4>${plan.idea}</h4>
+          <div class="stat-strip">
+            ${plan.when?`<span class="pill lavender">🗓 ${plan.when}</span>`:""}
+            ${plan.budget?`<span class="pill lavender">${plan.budget}</span>`:""}
+            <span class="pill lavender">${plan.lead}</span>
+            <span class="pill lavender">${plan.childcare}</span>
+          </div>
+          ${plan.prep?`<p style="margin:8px 0 4px;font-size:.87rem;color:var(--ink-soft);"><b>Prep:</b> ${plan.prep}</p>`:""}
+
+          <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);">
+            <div class="field">
+              <label>Best moment</label>
+              <input type="text" class="r-best" placeholder="What was the best moment?" value="${r.best||""}">
+            </div>
+            <div class="field">
+              <label>What made us laugh</label>
+              <input type="text" class="r-laugh" value="${r.laugh||""}">
+            </div>
+            <div class="field">
+              <label>How connected did we feel? (1–10)</label>
+              <div class="scale-row r-scale"></div>
+            </div>
+            <div class="field">
+              <label>Do this again?</label>
+              <div class="radio-row">
+                <label><input type="radio" name="again-${plan.id}" value="yes" ${r.again==="yes"?"checked":""}> Yes!</label>
+                <label><input type="radio" name="again-${plan.id}" value="tweak" ${r.again==="tweak"?"checked":""}> Maybe, with tweaks</label>
+              </div>
+            </div>
+            <div class="save-row">
+              <button class="btn btn-ghost btn-sm r-save">Save reflection</button>
+              <span class="save-msg r-msg">Saved ✓</span>
+            </div>
+          </div>
+        `;
+
+        // 1–10 scale buttons for this entry
+        const scaleEl = div.querySelector(".r-scale");
+        for(let i=1;i<=10;i++){
+          const b = document.createElement("button");
+          b.type = "button";
+          b.textContent = i;
+          if(r.scale===i) b.classList.add("sel");
+          b.addEventListener("click", ()=>{
+            r.scale = i;
+            scaleEl.querySelectorAll("button").forEach(x=>x.classList.remove("sel"));
+            b.classList.add("sel");
+          });
+          scaleEl.appendChild(b);
+        }
+
+        div.querySelector(".del").addEventListener("click", ()=>{
+          store.plans = store.plans.filter(p=>p.id!==plan.id);
+          saveStore(store);
+          renderArchive();
+        });
+
+        div.querySelector(".r-save").addEventListener("click", ()=>{
+          r.best = div.querySelector(".r-best").value;
+          r.laugh = div.querySelector(".r-laugh").value;
+          const checked = div.querySelector(`input[name="again-${plan.id}"]:checked`);
+          r.again = checked ? checked.value : null;
+          saveStore(store);
+          flashMsg(div.querySelector(".r-msg"));
+        });
+
+        archiveEl.appendChild(div);
+      });
+    }
+
+    renderArchive();
   })();
 
   // ---------------- BUDGET TRACKER (Tool #3) ----------------

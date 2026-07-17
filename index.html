@@ -91,7 +91,7 @@
       <div class="tool-pane active" id="pane-planner">
         <div class="form-card">
           <h3>Tool #1 — The Ultimate Date Night Planner</h3>
-          <p class="hint">Fill this out together. Step 1 is a brainstorm — no vetoes allowed.</p>
+          <p class="hint">Log a new date here. Every one you add gets saved below as an archive — come back after the date to fill in the reflection.</p>
 
           <div class="field">
             <label>Date idea selected</label>
@@ -133,37 +133,15 @@
           </div>
 
           <div class="save-row">
-            <button class="btn btn-primary btn-sm" id="pl-save">Save plan</button>
-            <span class="save-msg" id="pl-msg">Saved ✓</span>
+            <button class="btn btn-primary btn-sm" id="pl-save">+ Add to archive</button>
+            <span class="save-msg" id="pl-msg">Added ✓</span>
           </div>
         </div>
 
-        <div class="form-card">
-          <h3>Post-date reflection</h3>
-          <p class="hint">Fill this out after — it's how you build your own record of what actually works for you two.</p>
-          <div class="field">
-            <label>Best moment</label>
-            <input type="text" id="pl-best" placeholder="What was the best moment?">
-          </div>
-          <div class="field">
-            <label>What made us laugh</label>
-            <input type="text" id="pl-laugh" placeholder="">
-          </div>
-          <div class="field">
-            <label>How connected did we feel? (1–10)</label>
-            <div class="scale-row" id="pl-scale"></div>
-          </div>
-          <div class="field">
-            <label>Do this again?</label>
-            <div class="radio-row">
-              <label><input type="radio" name="pl-again" value="yes"> Yes!</label>
-              <label><input type="radio" name="pl-again" value="tweak"> Maybe, with tweaks</label>
-            </div>
-          </div>
-          <div class="save-row">
-            <button class="btn btn-primary btn-sm" id="pl-save2">Save reflection</button>
-            <span class="save-msg" id="pl-msg2">Saved ✓</span>
-          </div>
+        <div class="section-block" style="margin:0 0 40px;">
+          <h2 style="font-size:1.2rem;">Our date archive</h2>
+          <p class="sub" style="margin-top:0;">Newest first. Add a reflection to any entry once you've actually gone.</p>
+          <div class="spark-list" id="plan-archive"></div>
         </div>
       </div>
 
