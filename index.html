@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Letter to Tired Parents — Digital Companion</title>
+<meta name="description" content="The digital companion to the book: 50 date night ideas for tired parents, plus interactive planning tools.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <nav class="sidebar">
+    <p class="brand">A Letter to<br>Tired Parents</p>
+    <p class="brand-sub">Digital Companion</p>
+    <ul class="navlist" id="navlist">
+      <li><button data-view="home" class="active">Home</button></li>
+      <li><button data-view="quick">Quick &amp; Easy</button></li>
+      <li><button data-view="home-adv">At-Home Adventures</button></li>
+      <li><button data-view="frugal">Smart &amp; Frugal</button></li>
+      <li><button data-view="sitter">We Got a Sitter!</button></li>
+      <li><button data-view="celebrate">Celebrating Us</button></li>
+      <li><button data-view="toolkit">Planning Toolkit</button></li>
+    </ul>
+    <div class="sidebar-footer">
+      50 dates · always free · no pressure, just connection
+    </div>
+  </nav>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <!-- ---------- HOME ---------- -->
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <span class="eyebrow">The Digital Companion</span>
+        <h1>You don't need more<br><span class="tag">time</span>. Just a plan.</h1>
+        <p class="lede">This is the interactive companion to the book — every date idea, organized and browsable, plus the planner, budget tracker, and conversation starters made actually usable.</p>
+        <div class="stat-row">
+          <div class="stat"><b>50</b><span>date ideas</span></div>
+          <div class="stat"><b>5</b><span>categories</span></div>
+          <div class="stat"><b>$0</b><span>minimum to start</span></div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-primary" data-goto="quick">Browse Quick &amp; Easy dates</button>
+          <button class="btn btn-ghost" data-goto="toolkit">Open the Toolkit</button>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2>Five ways in, depending on your capacity</h2>
+        <p class="sub">Pick the section that matches how much time, money, and energy you actually have tonight.</p>
+        <div class="mini-card-grid" id="home-section-cards"></div>
+      </div>
+
+      <div class="section-block">
+        <h2><span class="tag">Try this now</span></h2>
+        <p class="sub">A random conversation starter, no planning required.</p>
+        <div class="starter-box" id="home-starter-box">
+          <div class="starter-cat" id="home-starter-cat">Fun &amp; Lighthearted</div>
+          <div class="starter-q" id="home-starter-q">Loading…</div>
+          <button class="btn btn-primary" id="home-starter-shuffle">Give us another</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- DATE SECTIONS (generated) ---------- -->
+    <section class="view" id="view-quick"></section>
+    <section class="view" id="view-home-adv"></section>
+    <section class="view" id="view-frugal"></section>
+    <section class="view" id="view-sitter"></section>
+    <section class="view" id="view-celebrate"></section>
+
+    <!-- ---------- TOOLKIT ---------- -->
+    <section class="view" id="view-toolkit">
+      <div class="section-head">
+        <span class="eyebrow">Part 3</span>
+        <h1>The Planning Toolkit</h1>
+        <p>Eliminate the "I don't know, what do you want to do?" loop. Everything here saves automatically in your browser, on this device.</p>
+      </div>
+
+      <div class="tool-tabs" id="tool-tabs">
+        <button class="tool-tab active" data-tool="planner">Date Night Planner</button>
+        <button class="tool-tab" data-tool="starters">Conversation Starters</button>
+        <button class="tool-tab" data-tool="budget">Budget Tracker</button>
+        <button class="tool-tab" data-tool="sparks">Our Idea Spark Pages</button>
+      </div>
+
+      <!-- Planner -->
+      <div class="tool-pane active" id="pane-planner">
+        <div class="form-card">
+          <h3>Tool #1 — The Ultimate Date Night Planner</h3>
+          <p class="hint">Fill this out together. Step 1 is a brainstorm — no vetoes allowed.</p>
+
+          <div class="field">
+            <label>Date idea selected</label>
+            <input type="text" id="pl-idea" placeholder="e.g. Blanket Fort & Movie Marathon">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Lead planner</label>
+              <select id="pl-lead">
+                <option>Partner A</option>
+                <option>Partner B</option>
+                <option>Tag-teaming</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Date &amp; time</label>
+              <input type="text" id="pl-when" placeholder="e.g. Friday 8pm">
+            </div>
+            <div class="field">
+              <label>Budget</label>
+              <input type="text" id="pl-budget" placeholder="$">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Childcare plan</label>
+            <select id="pl-childcare">
+              <option>At-home (kids asleep)</option>
+              <option>Grandparents</option>
+              <option>Sitter</option>
+              <option>Swap with another family</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>What we need to buy / prep</label>
+            <textarea id="pl-prep" placeholder="Charge camera, confirm sitter, hide the kids' toys…"></textarea>
+          </div>
+
+          <div class="save-row">
+            <button class="btn btn-primary btn-sm" id="pl-save">Save plan</button>
+            <span class="save-msg" id="pl-msg">Saved ✓</span>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h3>Post-date reflection</h3>
+          <p class="hint">Fill this out after — it's how you build your own record of what actually works for you two.</p>
+          <div class="field">
+            <label>Best moment</label>
+            <input type="text" id="pl-best" placeholder="What was the best moment?">
+          </div>
+          <div class="field">
+            <label>What made us laugh</label>
+            <input type="text" id="pl-laugh" placeholder="">
+          </div>
+          <div class="field">
+            <label>How connected did we feel? (1–10)</label>
+            <div class="scale-row" id="pl-scale"></div>
+          </div>
+          <div class="field">
+            <label>Do this again?</label>
+            <div class="radio-row">
+              <label><input type="radio" name="pl-again" value="yes"> Yes!</label>
+              <label><input type="radio" name="pl-again" value="tweak"> Maybe, with tweaks</label>
+            </div>
+          </div>
+          <div class="save-row">
+            <button class="btn btn-primary btn-sm" id="pl-save2">Save reflection</button>
+            <span class="save-msg" id="pl-msg2">Saved ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversation Starters -->
+      <div class="tool-pane" id="pane-starters">
+        <div class="form-card" style="text-align:center;">
+          <h3 style="margin-bottom:18px;">Tool #2 — Connection Conversation Starters</h3>
+          <p class="hint">No more "how was your day?" Pick a mood, or let it surprise you.</p>
+          <div class="starter-box">
+            <div class="starter-cat" id="tk-starter-cat">Fun &amp; Lighthearted</div>
+            <div class="starter-q" id="tk-starter-q">Loading…</div>
+            <button class="btn btn-primary" id="tk-starter-shuffle">Shuffle within this mood</button>
+            <div class="cat-buttons" id="tk-starter-cats"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget -->
+      <div class="tool-pane" id="pane-budget">
+        <div class="form-card">
+          <h3>Tool #3 — Date Night Budget Tracker</h3>
+          <p class="hint">Being mindful of spending removes stress. This adds up automatically.</p>
+          <table class="budget-table">
+            <thead>
+              <tr><th>Date</th><th>Idea</th><th>Budget</th><th>Actual spent</th><th>Notes</th><th></th></tr>
+            </thead>
+            <tbody id="budget-rows"></tbody>
+          </table>
+          <button class="btn btn-ghost btn-sm" id="budget-add">+ Add a date</button>
+          <div class="budget-total" id="budget-total">Total planned: $0 · Total spent: $0</div>
+        </div>
+      </div>
+
+      <!-- Idea Sparks -->
+      <div class="tool-pane" id="pane-sparks">
+        <div class="form-card">
+          <h3>Tool #4 — Our Idea Spark Pages</h3>
+          <p class="hint">What makes you, as a couple, uniquely you? Write your own date idea in the book's own recipe-card format.</p>
+          <div class="field">
+            <label>Date name</label>
+            <input type="text" id="spark-title" placeholder="Give your idea a name">
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Time</label><input type="text" id="spark-time" placeholder="e.g. 30 mins"></div>
+            <div class="field"><label>Cost</label><input type="text" id="spark-cost" placeholder="e.g. $"></div>
+            <div class="field"><label>Energy</label><input type="text" id="spark-energy" placeholder="e.g. Low"></div>
+          </div>
+          <div class="field">
+            <label>The plan</label>
+            <textarea id="spark-plan" placeholder="What do you actually do?"></textarea>
+          </div>
+          <div class="field">
+            <label>Conversation spark</label>
+            <input type="text" id="spark-spark" placeholder="A question to ask each other">
+          </div>
+          <button class="btn btn-primary btn-sm" id="spark-add">Add to our collection</button>
+        </div>
+
+        <div class="spark-list" id="spark-list"></div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      From the book <em>A Letter to Tired Parents</em>. Connection over perfection.
+    </footer>
+  </main>
+</div>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
