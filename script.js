@@ -17,6 +17,7 @@
   store.sparks = store.sparks || [];
   store.budget = store.budget || [];
   store.plans = store.plans || [];
+  store.starterNotes = store.starterNotes || [];
 
   // ---------------- NAVIGATION ----------------
   const NAV_TO_VIEW = {
@@ -191,12 +192,17 @@
     const catEl = document.getElementById("tk-starter-cat");
     const qEl = document.getElementById("tk-starter-q");
     const catButtonsEl = document.getElementById("tk-starter-cats");
+    const noteEl = document.getElementById("tk-starter-note");
+    const saveBtn = document.getElementById("tk-starter-save");
+    const msgEl = document.getElementById("tk-starter-msg");
+    const archiveEl = document.getElementById("starter-archive");
     let currentCat = catNames[0];
 
     function refresh(cat){
       currentCat = cat || currentCat;
       catEl.textContent = currentCat;
       qEl.textContent = randomStarter(currentCat);
+      noteEl.value = "";
       catButtonsEl.querySelectorAll("button").forEach(b=>{
         b.classList.toggle("active", b.textContent === currentCat);
       });
@@ -210,6 +216,48 @@
     });
     document.getElementById("tk-starter-shuffle").addEventListener("click", ()=> refresh());
     refresh(currentCat);
+
+    function renderArchive(){
+      archiveEl.innerHTML = "";
+      if(store.starterNotes.length===0){
+        archiveEl.innerHTML = `<p class="empty-note">Nothing saved yet — answer a starter above and save it.</p>`;
+        return;
+      }
+      store.starterNotes.forEach(n=>{
+        const div = document.createElement("div");
+        div.className = "spark-entry";
+        div.innerHTML = `
+          <button class="del" title="Delete">✕</button>
+          <div class="stat-strip"><span class="pill lavender">${n.cat}</span></div>
+          <h4>“${n.q}”</h4>
+          <p style="margin:0;font-size:.9rem;white-space:pre-line;">${n.note}</p>
+        `;
+        div.querySelector(".del").addEventListener("click", ()=>{
+          store.starterNotes = store.starterNotes.filter(x=>x.id!==n.id);
+          saveStore(store);
+          renderArchive();
+        });
+        archiveEl.appendChild(div);
+      });
+    }
+
+    saveBtn.addEventListener("click", ()=>{
+      const note = noteEl.value.trim();
+      if(!note){ noteEl.focus(); return; }
+      store.starterNotes.unshift({
+        id: Date.now(),
+        cat: currentCat,
+        q: qEl.textContent,
+        note
+      });
+      saveStore(store);
+      msgEl.classList.add("show");
+      setTimeout(()=>msgEl.classList.remove("show"), 1800);
+      noteEl.value = "";
+      renderArchive();
+    });
+
+    renderArchive();
   })();
 
   // ---------------- TOOLKIT TAB SWITCHING ----------------
@@ -461,6 +509,87 @@
       render();
     });
     render();
+  })();
+
+  // ---------------- EXPORT AS PDF ----------------
+  (function(){
+    const btn = document.getElementById("export-pdf-btn");
+    const printArea = document.getElementById("print-area");
+
+    function esc(s){
+      const d = document.createElement("div");
+      d.textContent = s == null ? "" : String(s);
+      return d.innerHTML;
+    }
+
+    function buildPrintHTML(){
+      const today = new Date().toLocaleDateString(undefined, {year:"numeric",month:"long",day:"numeric"});
+      let html = `<h1>Our Date Night Toolkit</h1><div class="print-sub">From "A Letter to Tired Parents" — exported ${today}</div>`;
+
+      html += `<h2>Our Date Archive</h2>`;
+      if(store.plans.length===0){
+        html += `<p class="p-empty">No dates logged yet.</p>`;
+      } else {
+        store.plans.forEach(p=>{
+          const r = p.reflection || {};
+          html += `<div class="p-entry">
+            <h3>${esc(p.idea)}</h3>
+            <div class="p-meta">${esc(p.when)||"No date set"} · ${esc(p.lead)} · ${esc(p.childcare)}${p.budget?` · Budget: ${esc(p.budget)}`:""}</div>
+            ${p.prep?`<div class="p-field"><b>Prep:</b> ${esc(p.prep)}</div>`:""}
+            ${r.best?`<div class="p-field"><b>Best moment:</b> ${esc(r.best)}</div>`:""}
+            ${r.laugh?`<div class="p-field"><b>What made us laugh:</b> ${esc(r.laugh)}</div>`:""}
+            ${r.scale?`<div class="p-field"><b>Connection score:</b> ${r.scale}/10</div>`:""}
+            ${r.again?`<div class="p-field"><b>Do again:</b> ${r.again==="yes"?"Yes!":"Maybe, with tweaks"}</div>`:""}
+          </div>`;
+        });
+      }
+
+      html += `<h2>Starters We've Talked Through</h2>`;
+      if(store.starterNotes.length===0){
+        html += `<p class="p-empty">Nothing saved yet.</p>`;
+      } else {
+        store.starterNotes.forEach(n=>{
+          html += `<div class="p-entry">
+            <h3>“${esc(n.q)}”</h3>
+            <div class="p-meta">${esc(n.cat)}</div>
+            <div class="p-field">${esc(n.note)}</div>
+          </div>`;
+        });
+      }
+
+      html += `<h2>Budget Tracker</h2>`;
+      const rows = store.budget.filter(r=> r.date||r.idea||r.budget||r.spent||r.notes);
+      if(rows.length===0){
+        html += `<p class="p-empty">No budget entries yet.</p>`;
+      } else {
+        html += `<table><thead><tr><th>Date</th><th>Idea</th><th>Budget</th><th>Spent</th><th>Notes</th></tr></thead><tbody>`;
+        rows.forEach(r=>{
+          html += `<tr><td>${esc(r.date)}</td><td>${esc(r.idea)}</td><td>${esc(r.budget)}</td><td>${esc(r.spent)}</td><td>${esc(r.notes)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+      }
+
+      html += `<h2>Our Idea Spark Pages</h2>`;
+      if(store.sparks.length===0){
+        html += `<p class="p-empty">No custom dates added yet.</p>`;
+      } else {
+        store.sparks.forEach(s=>{
+          html += `<div class="p-entry">
+            <h3>${esc(s.title)}</h3>
+            <div class="p-meta">${[s.time,s.cost,s.energy].filter(Boolean).map(esc).join(" · ")}</div>
+            ${s.plan?`<div class="p-field">${esc(s.plan)}</div>`:""}
+            ${s.spark?`<div class="p-field"><b>Conversation spark:</b> “${esc(s.spark)}”</div>`:""}
+          </div>`;
+        });
+      }
+
+      return html;
+    }
+
+    btn.addEventListener("click", ()=>{
+      printArea.innerHTML = buildPrintHTML();
+      window.print();
+    });
   })();
 
 })();

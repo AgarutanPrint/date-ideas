@@ -78,6 +78,7 @@
         <span class="eyebrow">Part 3</span>
         <h1>The Planning Toolkit</h1>
         <p>Eliminate the "I don't know, what do you want to do?" loop. Everything here saves automatically in your browser, on this device.</p>
+        <button class="btn btn-ghost btn-sm" id="export-pdf-btn" style="margin-top:6px;">📄 Export everything as PDF</button>
       </div>
 
       <div class="tool-tabs" id="tool-tabs">
@@ -155,7 +156,24 @@
             <div class="starter-q" id="tk-starter-q">Loading…</div>
             <button class="btn btn-primary" id="tk-starter-shuffle">Shuffle within this mood</button>
             <div class="cat-buttons" id="tk-starter-cats"></div>
+
+            <div style="text-align:left;margin-top:22px;padding-top:18px;border-top:1px dashed var(--border);">
+              <div class="field">
+                <label>What did you talk about? (optional)</label>
+                <textarea id="tk-starter-note" placeholder="Jot down what came up, so you can look back on it later…"></textarea>
+              </div>
+              <div class="save-row">
+                <button class="btn btn-ghost btn-sm" id="tk-starter-save">Save this answer</button>
+                <span class="save-msg" id="tk-starter-msg">Saved ✓</span>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="section-block" style="margin:30px 0 40px;">
+          <h2 style="font-size:1.2rem;">Starters we've talked through</h2>
+          <p class="sub" style="margin-top:0;">Every question you've answered and saved, kept here for you two to revisit.</p>
+          <div class="spark-list" id="starter-archive"></div>
         </div>
       </div>
 
@@ -209,6 +227,9 @@
     </footer>
   </main>
 </div>
+
+<!-- Populated by JS just before printing; hidden on screen via CSS, shown only in print -->
+<div id="print-area"></div>
 
 <script src="data.js"></script>
 <script src="script.js"></script>
