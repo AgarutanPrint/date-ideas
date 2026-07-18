@@ -156,23 +156,22 @@
             <div class="starter-q" id="tk-starter-q">Loading…</div>
             <button class="btn btn-primary" id="tk-starter-shuffle">Shuffle within this mood</button>
             <div class="cat-buttons" id="tk-starter-cats"></div>
-
-            <div style="text-align:left;margin-top:22px;padding-top:18px;border-top:1px dashed var(--border);">
-              <div class="field">
-                <label>What did you talk about? (optional)</label>
-                <textarea id="tk-starter-note" placeholder="Jot down what came up, so you can look back on it later…"></textarea>
-              </div>
-              <div class="save-row">
-                <button class="btn btn-ghost btn-sm" id="tk-starter-save">Save this answer</button>
-                <span class="save-msg" id="tk-starter-msg">Saved ✓</span>
-              </div>
-            </div>
           </div>
         </div>
 
+        <div class="form-card">
+          <h3>Write your own</h3>
+          <p class="hint">Got a question that's just for you two? Add it here, alongside the ones we recommend — it'll show up when you pick "Ours" above.</p>
+          <div class="field">
+            <label>Your conversation starter</label>
+            <input type="text" id="own-starter-input" placeholder="e.g. What's something you want us to try together this year?">
+          </div>
+          <button class="btn btn-primary btn-sm" id="own-starter-add">+ Add to our starters</button>
+        </div>
+
         <div class="section-block" style="margin:30px 0 40px;">
-          <h2 style="font-size:1.2rem;">Starters we've talked through</h2>
-          <p class="sub" style="margin-top:0;">Every question you've answered and saved, kept here for you two to revisit.</p>
+          <h2 style="font-size:1.2rem;">Our own starters</h2>
+          <p class="sub" style="margin-top:0;">Questions you two have written, separate from the ones we recommend.</p>
           <div class="spark-list" id="starter-archive"></div>
         </div>
       </div>

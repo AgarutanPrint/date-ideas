@@ -17,7 +17,8 @@
   store.sparks = store.sparks || [];
   store.budget = store.budget || [];
   store.plans = store.plans || [];
-  store.starterNotes = store.starterNotes || [];
+  store.customStarters = store.customStarters || (store.starterNotes ? [] : []);
+  delete store.starterNotes; // superseded by customStarters — old answer-notes feature removed
 
   // ---------------- NAVIGATION ----------------
   const NAV_TO_VIEW = {
@@ -187,76 +188,88 @@
     refresh();
   })();
 
-  // Toolkit widget with category buttons
+  // Toolkit widget with category buttons + user's own custom starters
   (function(){
     const catEl = document.getElementById("tk-starter-cat");
     const qEl = document.getElementById("tk-starter-q");
     const catButtonsEl = document.getElementById("tk-starter-cats");
-    const noteEl = document.getElementById("tk-starter-note");
-    const saveBtn = document.getElementById("tk-starter-save");
-    const msgEl = document.getElementById("tk-starter-msg");
     const archiveEl = document.getElementById("starter-archive");
+    const ownInput = document.getElementById("own-starter-input");
+    const ownAddBtn = document.getElementById("own-starter-add");
     let currentCat = catNames[0];
+
+    function randomOwn(){
+      if(store.customStarters.length===0) return "Add your own below, and it'll show up here!";
+      const list = store.customStarters;
+      return list[Math.floor(Math.random()*list.length)].q;
+    }
 
     function refresh(cat){
       currentCat = cat || currentCat;
-      catEl.textContent = currentCat;
-      qEl.textContent = randomStarter(currentCat);
-      noteEl.value = "";
+      catEl.textContent = currentCat === "Ours" ? "Yours" : currentCat;
+      qEl.textContent = currentCat === "Ours" ? randomOwn() : randomStarter(currentCat);
       catButtonsEl.querySelectorAll("button").forEach(b=>{
-        b.classList.toggle("active", b.textContent === currentCat);
+        b.classList.toggle("active", b.dataset.cat === currentCat);
       });
     }
-    catNames.forEach(cat=>{
-      const b = document.createElement("button");
-      b.className = "chip";
-      b.textContent = cat;
-      b.addEventListener("click", ()=> refresh(cat));
-      catButtonsEl.appendChild(b);
-    });
+
+    function buildCatButtons(){
+      catButtonsEl.innerHTML = "";
+      catNames.forEach(cat=>{
+        const b = document.createElement("button");
+        b.className = "chip";
+        b.dataset.cat = cat;
+        b.textContent = cat;
+        b.addEventListener("click", ()=> refresh(cat));
+        catButtonsEl.appendChild(b);
+      });
+      // "Ours" always available so people can find where to add their own
+      const ownBtn = document.createElement("button");
+      ownBtn.className = "chip";
+      ownBtn.dataset.cat = "Ours";
+      ownBtn.textContent = "Ours (" + store.customStarters.length + ")";
+      ownBtn.addEventListener("click", ()=> refresh("Ours"));
+      catButtonsEl.appendChild(ownBtn);
+    }
+
     document.getElementById("tk-starter-shuffle").addEventListener("click", ()=> refresh());
-    refresh(currentCat);
 
     function renderArchive(){
       archiveEl.innerHTML = "";
-      if(store.starterNotes.length===0){
-        archiveEl.innerHTML = `<p class="empty-note">Nothing saved yet — answer a starter above and save it.</p>`;
+      if(store.customStarters.length===0){
+        archiveEl.innerHTML = `<p class="empty-note">Nothing added yet — write your first one above.</p>`;
         return;
       }
-      store.starterNotes.forEach(n=>{
+      store.customStarters.forEach(s=>{
         const div = document.createElement("div");
         div.className = "spark-entry";
         div.innerHTML = `
           <button class="del" title="Delete">✕</button>
-          <div class="stat-strip"><span class="pill lavender">${n.cat}</span></div>
-          <h4>“${n.q}”</h4>
-          <p style="margin:0;font-size:.9rem;white-space:pre-line;">${n.note}</p>
+          <h4>“${s.q}”</h4>
         `;
         div.querySelector(".del").addEventListener("click", ()=>{
-          store.starterNotes = store.starterNotes.filter(x=>x.id!==n.id);
+          store.customStarters = store.customStarters.filter(x=>x.id!==s.id);
           saveStore(store);
+          buildCatButtons();
+          refresh(currentCat);
           renderArchive();
         });
         archiveEl.appendChild(div);
       });
     }
 
-    saveBtn.addEventListener("click", ()=>{
-      const note = noteEl.value.trim();
-      if(!note){ noteEl.focus(); return; }
-      store.starterNotes.unshift({
-        id: Date.now(),
-        cat: currentCat,
-        q: qEl.textContent,
-        note
-      });
+    ownAddBtn.addEventListener("click", ()=>{
+      const q = ownInput.value.trim();
+      if(!q){ ownInput.focus(); return; }
+      store.customStarters.unshift({ id: Date.now(), q });
       saveStore(store);
-      msgEl.classList.add("show");
-      setTimeout(()=>msgEl.classList.remove("show"), 1800);
-      noteEl.value = "";
+      ownInput.value = "";
+      buildCatButtons();
       renderArchive();
     });
 
+    buildCatButtons();
+    refresh(currentCat);
     renderArchive();
   })();
 
@@ -544,16 +557,12 @@
         });
       }
 
-      html += `<h2>Starters We've Talked Through</h2>`;
-      if(store.starterNotes.length===0){
-        html += `<p class="p-empty">Nothing saved yet.</p>`;
+      html += `<h2>Our Own Conversation Starters</h2>`;
+      if(store.customStarters.length===0){
+        html += `<p class="p-empty">Nothing added yet.</p>`;
       } else {
-        store.starterNotes.forEach(n=>{
-          html += `<div class="p-entry">
-            <h3>“${esc(n.q)}”</h3>
-            <div class="p-meta">${esc(n.cat)}</div>
-            <div class="p-field">${esc(n.note)}</div>
-          </div>`;
+        store.customStarters.forEach(s=>{
+          html += `<div class="p-entry"><h3>“${esc(s.q)}”</h3></div>`;
         });
       }
 
